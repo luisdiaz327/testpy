@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video Gallery</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Quicksand" rel="stylesheet">
+  <script crossorigin="anonymous" src="https://kit.fontawesome.com/3c5be74ba6.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Quicksand', sans-serif;
+      background: #111;
+      color: #fff;
+    }
+
+    #product {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      padding: 20px;
+    }
+
+    .product {
+      position: relative;
+      height: 150px;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .product:hover {
+      transform: scale(1.05);
+    }
+
+    .product::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0));
+    }
+
+    #info-p {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      z-index: 2;
+    }
+
+    #info-p h4 {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    #buy {
+      margin-top: 5px;
+      padding: 4px 10px;
+      font-size: 12px;
+      border: none;
+      background: #ff4757;
+      color: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* Modal overlay */
+    #info {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 1000;
+      padding: 20px;
+      overflow-y: auto;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+
+    .img-box {
+      position: relative;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .img-box h1 {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      font-size: 32px;
+      cursor: pointer;
+      color: #ff4757;
+    }
+
+    video {
+      width: 100%;
+      border-radius: 12px;
+      max-height: 70vh;
+      background: #000;
+    }
+
+    .info {
+      max-width: 900px;
+      margin: 20px auto;
+      background: #222;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .info h4 {
+      margin-top: 0;
+    }
+
+    .buttons {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .buttons a, .buttons button {
+      padding: 8px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      transition: 0.2s;
+    }
+
+    .btn-primary { background: #1e90ff; color: #fff; }
+    .btn-secondary { background: #2ed573; color: #fff; }
+    .btn-primary:hover { background: #006ad1; }
+    .btn-secondary:hover { background: #1ca95a; }
+  </style>
+</head>
+
+<body>
+  <!--Products-->
+  <div id="product"></div>
+  <div id="info"></div>
+
+  <script>
+    // fetch Data.json instead of hardcoded array
+    fetch("Data.json")
+      .then(res => res.json())
+      .then(data => {
+        let productContainer = document.getElementById("product");
+
+        data.forEach((item, index) => {
+          productContainer.innerHTML += `
+            <div class="product" 
+              style="background:url('${item.thumbnail}') center/cover;"
+              onclick="info(${index})">
+
+              <div id="info-p">
+                <h4>${item.title.substring(0,25)}...</h4>
+                <button id="buy">Watch</button>
+              </div>
+            </div>
+          `;
+        });
+
+        // make info() available after fetch
+        window.info = function(num) {
+          let infoBox = document.getElementById("info");
+          let item = data[num];
+
+          infoBox.style.display = "block";
+          infoBox.innerHTML = `
+            <div class="img-box">
+              <h1 class="fas fa-arrow-circle-left" onclick="back_home()"></h1>
+              <video src="${item.video_url}" controls autoplay></video>
+            </div>
+            <div class="info">
+              <h4>${item.title}</h4>
+              <div class="buttons">
+                <a href="${item.link}" target="_blank" class="btn-primary">Open Page</a>
+                <a href="${item.video_url}" download class="btn-secondary">Download</a>
+              </div>
+            </div>
+          `;
+        }
+
+        // go back
+        window.back_home = function() {
+          document.getElementById("info").style.display = "none";
+          document.getElementById("info").innerHTML = "";
+        }
+      })
+      .catch(err => console.error("Error loading Data.json:", err));
+  </script>
+</body>
+</html>
